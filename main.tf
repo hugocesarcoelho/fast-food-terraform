@@ -125,10 +125,10 @@ resource "aws_elasticache_subnet_group" "redis_subnet_group" {
   subnet_ids = ["subnet-0e6be6f8c1d2d0232"]
 }
 
-# Output the Redis primary endpoint
-output "redis_primary_endpoint" {
-  value = aws_elasticache_replication_group.redis_replication.primary_endpoint
-}
+# # Output the Redis primary endpoint
+# output "redis_primary_endpoint" {
+#   value = aws_elasticache_replication_group.redis_replication.primary_endpoint.address
+# }
 
 data "archive_file" "lambda_zip" {
   type        = "zip"
