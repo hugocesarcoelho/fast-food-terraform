@@ -113,21 +113,17 @@ resource "aws_elasticache_cluster" "redis" {
   port                 = 6379
   security_group_ids   = [aws_security_group.redis-sg.id]
   subnet_group_name    = aws_elasticache_subnet_group.redis.name
+  publicly_accessible  = true
 
   tags = {
     Name = "fiap-redis"
   }
 }
 
-output "redis_endpoint" {
+output "redis_primary_endpoint" {
   value = aws_elasticache_cluster.redis.cache_nodes[0].address
 }
 
-# resource "aws_iam_policy_attachment" "lambda_logs" {
-#   name       = "lambda_logs"
-#   roles      = ["LabRole"]
-#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-# }
 
 data "archive_file" "lambda_zip" {
   type        = "zip"
