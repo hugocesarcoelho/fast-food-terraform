@@ -81,15 +81,14 @@ output "rds_endpoint" {
   value = aws_db_instance.mysql.endpoint
 }
 
-# Create the Redis Security Group allowing access on port 6379 from anywhere
-resource "aws_security_group" "redis_sg" {
-  name_prefix = "redis_sg"
+resource "aws_security_group" "redis-sg" {
+  name = "${random_pet.sg.id}-redis-sg"
 
   ingress {
     from_port   = 6379
     to_port     = 6379
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Allow access from anywhere (make sure this is secure for your use case)
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -100,35 +99,29 @@ resource "aws_security_group" "redis_sg" {
   }
 }
 
-# Create the Redis Replication Group (for publicly accessible endpoint)
-resource "aws_elasticache_replication_group" "redis_replication" {
-  replication_group_id  = "fiap-redis-replication-group"
-  description           = "Redis replication group for public access"
-  engine                = "redis"
-  node_type             = "cache.t3.micro"
-  number_cache_clusters = 1 # Single-node setup (for this example)
+resource "aws_elasticache_subnet_group" "redis" {
+  name       = "redis-subnet-group"
+  subnet_ids = ["subnet-0e6be6f8c1d2d0232", "subnet-051df09ed3adb7510", "subnet-002e1c254379eae5b", "subnet-0a40b6e40973981bf", "subnet-007d0f8c197010954", "subnet-0194eafe9eca9838b"]
+}
 
-  # Enable public access to the replication group
-  # publicly_accessible = true
-
-  security_group_ids = [aws_security_group.redis_sg.id]
-  subnet_group_name  = aws_elasticache_subnet_group.redis_subnet_group.name
+resource "aws_elasticache_cluster" "redis" {
+  cluster_id           = "fiap-redis-cluster"
+  engine               = "redis"
+  node_type            = "cache.t3.micro"
+  num_cache_nodes      = 1
+  parameter_group_name = "default.redis7"
+  port                 = 6379
+  security_group_ids   = [aws_security_group.redis-sg.id]
+  subnet_group_name    = aws_elasticache_subnet_group.redis.name
 
   tags = {
-    Name = "fiap-redis-cluster"
+    Name = "fiap-redis"
   }
 }
 
-# Create the ElastiCache Redis Subnet Group
-resource "aws_elasticache_subnet_group" "redis_subnet_group" {
-  name       = "redis-subnet-group"
-  subnet_ids = ["subnet-0e6be6f8c1d2d0232"]
+output "redis_endpoint" {
+  value = aws_elasticache_cluster.redis.cache_nodes[0].address
 }
-
-# # Output the Redis primary endpoint
-# output "redis_primary_endpoint" {
-#   value = aws_elasticache_replication_group.redis_replication.primary_endpoint.address
-# }
 
 data "archive_file" "lambda_zip" {
   type        = "zip"
