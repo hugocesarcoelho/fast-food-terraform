@@ -141,7 +141,7 @@ data "archive_file" "lambda_zip" {
 
 resource "aws_lambda_function" "http_lambda" {
   filename         = data.archive_file.lambda_zip.output_path
-  function_name    = "http_lambda"
+  function_name    = "cpf_auth_lambda"
   role             = "arn:aws:iam::174607920130:role/LabRole"
   handler          = "index.lambdaHandler"
   runtime          = "nodejs18.x"
