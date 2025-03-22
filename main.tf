@@ -69,7 +69,7 @@ resource "aws_db_instance" "mysql" {
   password               = random_password.db_password.result
   db_name                = "fiapdb"
   skip_final_snapshot    = true
-  publicly_accessible    = true  # Allow the MySQL instance to be publicly accessible
+  publicly_accessible    = true # Allow the MySQL instance to be publicly accessible
   vpc_security_group_ids = [aws_security_group.rds-sg.id]
 
   tags = {
@@ -88,7 +88,7 @@ resource "aws_security_group" "redis-sg" {
     from_port   = 6379
     to_port     = 6379
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Allow all internet access, adjust as necessary
+    cidr_blocks = ["0.0.0.0/0"] # Allow all internet access, adjust as necessary
   }
 
   egress {
