@@ -69,7 +69,7 @@ resource "aws_db_instance" "mysql" {
   password               = random_password.db_password.result
   db_name                = "fiapdb"
   skip_final_snapshot    = true
-  publicly_accessible    = true
+  publicly_accessible    = true  # Allow the MySQL instance to be publicly accessible
   vpc_security_group_ids = [aws_security_group.rds-sg.id]
 
   tags = {
@@ -88,7 +88,7 @@ resource "aws_security_group" "redis-sg" {
     from_port   = 6379
     to_port     = 6379
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]  # Allow all internet access, adjust as necessary
   }
 
   egress {
@@ -113,7 +113,6 @@ resource "aws_elasticache_cluster" "redis" {
   port                 = 6379
   security_group_ids   = [aws_security_group.redis-sg.id]
   subnet_group_name    = aws_elasticache_subnet_group.redis.name
-  publicly_accessible  = true
 
   tags = {
     Name = "fiap-redis"
@@ -124,6 +123,11 @@ output "redis_primary_endpoint" {
   value = aws_elasticache_cluster.redis.cache_nodes[0].address
 }
 
+# resource "aws_iam_policy_attachment" "lambda_logs" {
+#   name       = "lambda_logs"
+#   roles      = ["LabRole"]
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+# }
 
 data "archive_file" "lambda_zip" {
   type        = "zip"
