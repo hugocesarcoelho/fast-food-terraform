@@ -123,11 +123,11 @@ output "redis_endpoint" {
   value = aws_elasticache_cluster.redis.cache_nodes[0].address
 }
 
-resource "aws_iam_policy_attachment" "lambda_logs" {
-  name       = "lambda_logs"
-  roles      = ["LabRole"]
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
+# resource "aws_iam_policy_attachment" "lambda_logs" {
+#   name       = "lambda_logs"
+#   roles      = ["LabRole"]
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+# }
 
 data "archive_file" "lambda_zip" {
   type        = "zip"
