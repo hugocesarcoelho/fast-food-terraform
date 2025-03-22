@@ -89,7 +89,7 @@ resource "aws_security_group" "redis_sg" {
     from_port   = 6379
     to_port     = 6379
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Allow access from anywhere (make sure this is secure for your use case)
+    cidr_blocks = ["0.0.0.0/0"] # Allow access from anywhere (make sure this is secure for your use case)
   }
 
   egress {
@@ -106,13 +106,13 @@ resource "aws_elasticache_replication_group" "redis_replication" {
   replication_group_description = "Redis replication group for public access"
   engine                        = "redis"
   node_type                     = "cache.t3.micro"
-  number_cache_clusters         = 1  # Single-node setup (for this example)
+  number_cache_clusters         = 1 # Single-node setup (for this example)
 
   # Enable public access to the replication group
-  publicly_accessible           = true
+  publicly_accessible = true
 
-  security_group_ids            = [aws_security_group.redis_sg.id]
-  subnet_group_name             = aws_elasticache_subnet_group.redis_subnet_group.name
+  security_group_ids = [aws_security_group.redis_sg.id]
+  subnet_group_name  = aws_elasticache_subnet_group.redis_subnet_group.name
 
   tags = {
     Name = "fiap-redis-cluster"
