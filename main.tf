@@ -137,25 +137,14 @@ resource "aws_iam_policy_attachment" "lambda_logs" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# Empacotamento do código da Lambda
-data "archive_file" "lambda_zip" {
-  type        = "zip"
-  output_path = "lambda.zip"
-
-  source {
-    content  = file("src/index.mjs")
-    filename = "index.mjs"
-  }
-}
-
 # Recurso AWS Lambda
 resource "aws_lambda_function" "http_lambda" {
-  filename         = data.archive_file.lambda_zip.output_path
   function_name    = "http_lambda"
-  role             = "arn:aws:iam::174607920130:role/LabRole"
+  role             = aws_iam_role.lambda_role.arn
   handler          = "index.lambdaHandler"
   runtime          = "nodejs18.x"
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+  # filename         = "../src/index.zip" # Assumindo que o código já está zipado manualmente
+  # source_code_hash = filebase64sha256("../src/index.zip")
 
   environment {
     variables = {
