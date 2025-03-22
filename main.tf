@@ -109,7 +109,7 @@ resource "aws_elasticache_replication_group" "redis_replication" {
   number_cache_clusters         = 1 # Single-node setup (for this example)
 
   # Enable public access to the replication group
-  publicly_accessible = true
+  # publicly_accessible = true
 
   security_group_ids = [aws_security_group.redis_sg.id]
   subnet_group_name  = aws_elasticache_subnet_group.redis_subnet_group.name
