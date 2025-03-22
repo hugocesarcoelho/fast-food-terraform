@@ -151,6 +151,12 @@ resource "aws_lambda_function" "http_lambda" {
       X_API_KEY   = "a60380f9-85d7-47bc-a73b-230cec5e4e1"
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      source_code_hash
+    ]
+  }
 }
 
 resource "aws_api_gateway_rest_api" "api" {
