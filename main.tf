@@ -26,13 +26,11 @@ provider "aws" {
 
 resource "random_pet" "sg" {}
 
-# Generate a random password for RDS
 resource "random_password" "db_password" {
   length  = 16
   special = false
 }
 
-# Store the password in AWS Secrets Manager
 resource "aws_secretsmanager_secret" "db_secret" {
   name = "mysql-rds-password"
 }
@@ -42,7 +40,6 @@ resource "aws_secretsmanager_secret_version" "db_secret_version" {
   secret_string = random_password.db_password.result
 }
 
-# Security Group for RDS
 resource "aws_security_group" "rds-sg" {
   name = "${random_pet.sg.id}-rds-sg"
 
@@ -61,7 +58,6 @@ resource "aws_security_group" "rds-sg" {
   }
 }
 
-# Create an RDS MySQL Instance
 resource "aws_db_instance" "mysql" {
   identifier             = "fiap-mysql-db-2"
   engine                 = "mysql"
@@ -85,7 +81,6 @@ output "rds_endpoint" {
   value = aws_db_instance.mysql.endpoint
 }
 
-# Security Group for Redis
 resource "aws_security_group" "redis-sg" {
   name = "${random_pet.sg.id}-redis-sg"
 
@@ -104,13 +99,11 @@ resource "aws_security_group" "redis-sg" {
   }
 }
 
-# Subnet Group for Redis
 resource "aws_elasticache_subnet_group" "redis" {
   name       = "redis-subnet-group"
-  subnet_ids = ["subnet-0e6be6f8c1d2d0232", "subnet-051df09ed3adb7510", "subnet-002e1c254379eae5b", "subnet-0a40b6e40973981bf", "subnet-007d0f8c197010954", "subnet-0194eafe9eca9838b"] # Replace with actual subnet IDs
+  subnet_ids = ["subnet-0e6be6f8c1d2d0232", "subnet-051df09ed3adb7510", "subnet-002e1c254379eae5b", "subnet-0a40b6e40973981bf", "subnet-007d0f8c197010954", "subnet-0194eafe9eca9838b"]
 }
 
-# Redis Cluster
 resource "aws_elasticache_cluster" "redis" {
   cluster_id           = "fiap-redis-cluster"
   engine               = "redis"
@@ -130,48 +123,41 @@ output "redis_endpoint" {
   value = aws_elasticache_cluster.redis.cache_nodes[0].address
 }
 
-# Política de permissões para logs e acesso à VPC
 resource "aws_iam_policy_attachment" "lambda_logs" {
   name       = "lambda_logs"
   roles      = ["LabRole"]
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# Recurso AWS Lambda
 resource "aws_lambda_function" "http_lambda" {
-  function_name    = "http_lambda"
-  role             = aws_iam_role.lambda_role.arn
-  handler          = "index.lambdaHandler"
-  runtime          = "nodejs18.x"
-  # filename         = "../src/index.zip" # Assumindo que o código já está zipado manualmente
-  # source_code_hash = filebase64sha256("../src/index.zip")
+  function_name = "http_lambda"
+  role          = aws_iam_role.lambda_role.arn
+  handler       = "index.lambdaHandler"
+  runtime       = "nodejs18.x"
 
   environment {
     variables = {
-      DB_HOST     = "seu-host-mysql"
-      DB_USER     = "seu-usuario"
+      DB_HOST   = "seu-host-mysql"
+      DB_USER   = "seu-usuario"
       DB_PASSWORD = "sua-senha"
-      DB_NAME     = "seu-banco"
-      DB_PORT     = "3306"
-      X_API_KEY   = "sua-chave-api"
+      DB_NAME   = "seu-banco"
+      DB_PORT   = "3306"
+      X_API_KEY = "sua-chave-api"
     }
   }
 }
 
-# API Gateway REST API
 resource "aws_api_gateway_rest_api" "api" {
   name        = "lambda_http_api"
   description = "API Gateway para Lambda HTTP"
 }
 
-# API Gateway Resource
 resource "aws_api_gateway_resource" "resource" {
   rest_api_id = aws_api_gateway_rest_api.api.id
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
   path_part   = "lambda"
 }
 
-# API Gateway Método (POST)
 resource "aws_api_gateway_method" "method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.resource.id
@@ -179,7 +165,6 @@ resource "aws_api_gateway_method" "method" {
   authorization = "NONE"
 }
 
-# Integração API Gateway -> Lambda
 resource "aws_api_gateway_integration" "integration" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
   resource_id             = aws_api_gateway_resource.resource.id
@@ -189,7 +174,6 @@ resource "aws_api_gateway_integration" "integration" {
   uri                     = aws_lambda_function.http_lambda.invoke_arn
 }
 
-# Permissão para API Gateway chamar a Lambda
 resource "aws_lambda_permission" "api_gateway" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
@@ -198,14 +182,6 @@ resource "aws_lambda_permission" "api_gateway" {
   source_arn    = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
 }
 
-# Deploy da API Gateway
-resource "aws_api_gateway_deployment" "deployment" {
-  depends_on  = [aws_api_gateway_integration.integration]
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  stage_name  = "prod"
-}
-
-# Saída com a URL de acesso
 output "invoke_url" {
-  value = "${aws_api_gateway_deployment.deployment.invoke_url}/lambda"
+  value = "${aws_api_gateway_rest_api.api.execution_arn}/lambda"
 }
