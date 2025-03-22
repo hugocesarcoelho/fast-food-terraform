@@ -149,7 +149,7 @@ resource "aws_lambda_function" "http_lambda" {
 
   environment {
     variables = {
-      DB_HOST     = aws_db_instance.mysql.endpoint
+      DB_HOST     = split(":", aws_db_instance.mysql.endpoint)[0]
       DB_USER     = "admin"
       DB_PASSWORD = random_password.db_password.result
       DB_NAME     = "fiapdb"
