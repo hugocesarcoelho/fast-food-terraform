@@ -149,12 +149,12 @@ resource "aws_lambda_function" "http_lambda" {
 
   environment {
     variables = {
-      DB_HOST     = "seu-host-mysql"
-      DB_USER     = "seu-usuario"
-      DB_PASSWORD = "sua-senha"
-      DB_NAME     = "seu-banco"
+      DB_HOST     = aws_db_instance.mysql.endpoint
+      DB_USER     = "admin"
+      DB_PASSWORD = random_password.db_password.result
+      DB_NAME     = "fiapdb"
       DB_PORT     = "3306"
-      X_API_KEY   = "sua-chave-api"
+      X_API_KEY   = "a60380f9-85d7-47bc-a73b-230cec5e4e1"
     }
   }
 }
