@@ -81,14 +81,15 @@ output "rds_endpoint" {
   value = aws_db_instance.mysql.endpoint
 }
 
-resource "aws_security_group" "redis-sg" {
-  name = "${random_pet.sg.id}-redis-sg"
+# Create the Redis Security Group allowing access on port 6379 from anywhere
+resource "aws_security_group" "redis_sg" {
+  name_prefix = "redis_sg"
 
   ingress {
     from_port   = 6379
     to_port     = 6379
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]  # Allow access from anywhere (make sure this is secure for your use case)
   }
 
   egress {
@@ -99,29 +100,34 @@ resource "aws_security_group" "redis-sg" {
   }
 }
 
-resource "aws_elasticache_subnet_group" "redis" {
+# Create the Redis Replication Group (for publicly accessible endpoint)
+resource "aws_elasticache_replication_group" "redis_replication" {
+  replication_group_id          = "fiap-redis-replication-group"
+  replication_group_description = "Redis replication group for public access"
+  engine                        = "redis"
+  node_type                     = "cache.t3.micro"
+  number_cache_clusters         = 1  # Single-node setup (for this example)
+
+  # Enable public access to the replication group
+  publicly_accessible           = true
+
+  security_group_ids            = [aws_security_group.redis_sg.id]
+  subnet_group_name             = aws_elasticache_subnet_group.redis_subnet_group.name
+
+  tags = {
+    Name = "fiap-redis-cluster"
+  }
+}
+
+# Create the ElastiCache Redis Subnet Group
+resource "aws_elasticache_subnet_group" "redis_subnet_group" {
   name       = "redis-subnet-group"
   subnet_ids = ["subnet-0e6be6f8c1d2d0232"]
 }
 
-resource "aws_elasticache_cluster" "redis" {
-  cluster_id           = "fiap-redis-cluster"
-  engine               = "redis"
-  node_type            = "cache.t3.micro"
-  num_cache_nodes      = 1
-  parameter_group_name = "default.redis7"
-  port                 = 6379
-  security_group_ids   = [aws_security_group.redis-sg.id]
-  subnet_group_name    = aws_elasticache_subnet_group.redis.name
-  publicly_accessible  = true
-
-  tags = {
-    Name = "fiap-redis"
-  }
-}
-
-output "redis_endpoint" {
-  value = aws_elasticache_cluster.redis.cache_nodes[0].address
+# Output the Redis primary endpoint
+output "redis_primary_endpoint" {
+  value = aws_elasticache_replication_group.redis_replication.primary_endpoint
 }
 
 data "archive_file" "lambda_zip" {
