@@ -142,7 +142,7 @@ data "archive_file" "lambda_zip" {
 resource "aws_lambda_function" "http_lambda" {
   filename         = data.archive_file.lambda_zip.output_path
   function_name    = "http_lambda"
-  role             = aws_iam_role.lambda_role.arn
+  role             = "arn:aws:iam::174607920130:role/LabRole"
   handler          = "index.lambdaHandler"
   runtime          = "nodejs18.x"
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
