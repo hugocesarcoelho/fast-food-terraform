@@ -131,7 +131,7 @@ resource "aws_iam_policy_attachment" "lambda_logs" {
 
 resource "aws_lambda_function" "http_lambda" {
   function_name = "http_lambda"
-  role          = aws_iam_role.lambda_role.arn
+  role          = "arn:aws:iam::174607920130:role/LabRole"
   handler       = "index.lambdaHandler"
   runtime       = "nodejs18.x"
 
