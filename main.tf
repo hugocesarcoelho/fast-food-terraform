@@ -134,27 +134,27 @@ data "archive_file" "lambda_zip" {
   output_path = "lambda.zip"
 
   source {
-    content = file("src/index.mjs")
+    content  = file("src/index.mjs")
     filename = "index.mjs"
   }
 }
 
 resource "aws_lambda_function" "http_lambda" {
-  filename        = data.archive_file.lambda_zip.output_path
-  function_name   = "http_lambda"
-  role            = aws_iam_role.lambda_role.arn
-  handler         = "index.lambdaHandler"
-  runtime         = "nodejs18.x"
+  filename         = data.archive_file.lambda_zip.output_path
+  function_name    = "http_lambda"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "index.lambdaHandler"
+  runtime          = "nodejs18.x"
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
   environment {
     variables = {
-      DB_HOST   = "seu-host-mysql"
-      DB_USER   = "seu-usuario"
+      DB_HOST     = "seu-host-mysql"
+      DB_USER     = "seu-usuario"
       DB_PASSWORD = "sua-senha"
-      DB_NAME   = "seu-banco"
-      DB_PORT   = "3306"
-      X_API_KEY = "sua-chave-api"
+      DB_NAME     = "seu-banco"
+      DB_PORT     = "3306"
+      X_API_KEY   = "sua-chave-api"
     }
   }
 }
