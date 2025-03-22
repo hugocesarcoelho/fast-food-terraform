@@ -160,7 +160,7 @@ resource "aws_lambda_function" "http_lambda" {
 }
 
 resource "aws_api_gateway_rest_api" "api" {
-  name        = "lambda_http_api"
+  name        = "cpf_auth_lambda_api"
   description = "API Gateway para Lambda HTTP"
 }
 
