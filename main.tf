@@ -193,3 +193,13 @@ resource "aws_lambda_permission" "api_gateway" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
 }
+
+resource "aws_api_gateway_deployment" "example" {
+  depends_on  = [aws_api_gateway_integration.integration]
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  stage_name  = "prod"
+}
+
+output "api_url" {
+  value = aws_api_gateway_deployment.api.invoke_url
+}
