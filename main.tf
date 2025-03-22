@@ -134,7 +134,7 @@ data "archive_file" "lambda_zip" {
   output_path = "lambda.zip"
 
   source {
-    content  = file("src/index.mjs")
+    content = file("src/index.mjs")
     filename = "index.mjs"
   }
 }
