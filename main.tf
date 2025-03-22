@@ -137,12 +137,12 @@ resource "aws_lambda_function" "http_lambda" {
 
   environment {
     variables = {
-      DB_HOST   = "seu-host-mysql"
-      DB_USER   = "seu-usuario"
+      DB_HOST     = "seu-host-mysql"
+      DB_USER     = "seu-usuario"
       DB_PASSWORD = "sua-senha"
-      DB_NAME   = "seu-banco"
-      DB_PORT   = "3306"
-      X_API_KEY = "sua-chave-api"
+      DB_NAME     = "seu-banco"
+      DB_PORT     = "3306"
+      X_API_KEY   = "sua-chave-api"
     }
   }
 }
@@ -180,8 +180,4 @@ resource "aws_lambda_permission" "api_gateway" {
   function_name = aws_lambda_function.http_lambda.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
-}
-
-output "invoke_url" {
-  value = "${aws_api_gateway_rest_api.api.execution_arn}/lambda"
 }
