@@ -103,7 +103,7 @@ resource "aws_security_group" "redis_sg" {
 # Create the Redis Replication Group (for publicly accessible endpoint)
 resource "aws_elasticache_replication_group" "redis_replication" {
   replication_group_id          = "fiap-redis-replication-group"
-  replication_group_description = "Redis replication group for public access"
+  description  = "Redis replication group for public access"
   engine                        = "redis"
   node_type                     = "cache.t3.micro"
   number_cache_clusters         = 1 # Single-node setup (for this example)
